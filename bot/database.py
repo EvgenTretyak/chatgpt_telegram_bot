@@ -31,6 +31,9 @@ class Database:
         username: str = "",
         first_name: str = "",
         last_name: str = "",
+        payment_id: str = "",
+        amount: int,
+        currency: str = "",
     ):
         user_dict = {
             "_id": user_id,
@@ -39,6 +42,10 @@ class Database:
             "username": username,
             "first_name": first_name,
             "last_name": last_name,
+
+            "payment_id": payment_id,
+            "amount": amount,
+            "currency": currency,
 
             "last_interaction": datetime.now(),
             "first_seen": datetime.now(),
@@ -56,6 +63,18 @@ class Database:
         if not self.check_if_user_exists(user_id):
             self.user_collection.insert_one(user_dict)
 
+    def save_payment(self, user_id: int, payment_id: str, amount: int, currency: str):
+        self:check_if_user_exists(user_id, raise_exception=True)
+        self:check_if_payment_id_exists(payment_id, raise_exception=True)
+        self:check_if_amount_exists(amount, raise_exception=True)
+        self:check_if_currency_exists(currency, raise_exception=True)
+        self.dialog_collection.update_one(
+            {"_id": user_id},
+            {"payment_id": payment_id},
+            {"amount": amount},
+            {"currency": currency},
+        )
+        
     def start_new_dialog(self, user_id: int):
         self.check_if_user_exists(user_id, raise_exception=True)
 
