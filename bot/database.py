@@ -68,11 +68,11 @@ class Database:
         self:check_if_payment_id_exists(payment_id, raise_exception=True)
         self:check_if_amount_exists(amount, raise_exception=True)
         self:check_if_currency_exists(currency, raise_exception=True)
-        self.dialog_collection.update_one(
+        self.user_collection.update_one(
             {"_id": user_id},
             {"payment_id": payment_id},
             {"amount": amount},
-            {"currency": currency},
+            {"currency": currency}
         )
         
     def start_new_dialog(self, user_id: int):
