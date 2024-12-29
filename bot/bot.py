@@ -40,6 +40,10 @@ logger = logging.getLogger(__name__)
 user_semaphores = {}
 user_tasks = {}
 
+DONUT_MESSAGES = """Вы можете задонатить нужную сумму.
+Спасибо за поддержку!
+"""
+
 HELP_MESSAGE = """Commands:
 ⚪ /retry – Regenerate last bot answer
 ⚪ /new – Start new dialog
@@ -47,6 +51,7 @@ HELP_MESSAGE = """Commands:
 ⚪ /settings – Show settings
 ⚪ /balance – Show balance
 ⚪ /help – Show help
+/donat - Donat stars
 
 🎨 Generate images from text prompts in <b>👩‍🎨 Artist</b> /mode
 👥 Add bot to <b>group chat</b>: /help_group_chat
@@ -142,6 +147,9 @@ async def start_handle(update: Update, context: CallbackContext):
     await update.message.reply_text(reply_text, parse_mode=ParseMode.HTML)
     await show_chat_modes_handle(update, context)
 
+async def send_invoice_handler(update: Update, context: CallbackContext):
+    await register_user_if_not_exists(update, context, update.message.from_user)
+    await update.message.reply_text(DONUT_MESSAGES, parse_mode=ParseMode.HTML)
 
 async def help_handle(update: Update, context: CallbackContext):
     await register_user_if_not_exists(update, context, update.message.from_user)
@@ -819,6 +827,7 @@ async def post_init(application: Application):
         BotCommand("/balance", "Show balance"),
         BotCommand("/settings", "Show settings"),
         BotCommand("/help", "Show help message"),
+	BotCommand("/donat", "Donat stars to bot"),
     ])
 
 def run_bot() -> None:
@@ -864,6 +873,8 @@ def run_bot() -> None:
     application.add_handler(CallbackQueryHandler(set_settings_handle, pattern="^set_settings"))
 
     application.add_handler(CommandHandler("balance", show_balance_handle, filters=user_filter))
+
+    application.add_handler(CommandHandler("donat", send_invoice_handler, filters=user_filter))
 
     application.add_error_handler(error_handle)
 
